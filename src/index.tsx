@@ -7,7 +7,7 @@ import FakeStorage from './fake_storage'
 
 const rootElement = document.getElementById('root') as HTMLElement
 
-const locale = 'en'
+const locale = 'nl'
 const workerFile = new URL('./framework/processing/py_worker.js', import.meta.url)
 const worker = new Worker(workerFile)
 

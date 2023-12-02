@@ -7,10 +7,8 @@ import { ReactFactoryContext } from '../../factory'
 import { PrimaryButton } from '../elements/button'
 import { CheckBox } from '../elements/check_box'
 import { Label, Title1 } from '../elements/text'
-import LogoSvg from '../../../../../assets/images/logo.svg'
 import { Footer } from './templates/footer'
 import { Page } from './templates/page'
-import { Sidebar } from './templates/sidebar'
 import { Bullet } from '../elements/bullet'
 
 interface Copy {
@@ -113,8 +111,6 @@ export const SplashScreen = (props: Props): JSX.Element => {
 
   const footer: JSX.Element = <Footer />
 
-  const sidebar: JSX.Element = <Sidebar logo={LogoSvg} />
-
   const body: JSX.Element = (
     <>
       <Title1 text={title} />
@@ -134,7 +130,6 @@ export const SplashScreen = (props: Props): JSX.Element => {
   return (
     <Page
       body={body}
-      sidebar={sidebar}
       footer={footer}
     />
   )
