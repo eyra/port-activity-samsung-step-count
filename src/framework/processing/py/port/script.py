@@ -9,7 +9,7 @@ from port.api.commands import CommandSystemDonate, CommandUIRender
 
 import pandas as pd
 import zipfile
-import json
+import os
 
 ExtractionResult = namedtuple("ExtractionResult", ["id", "title", "data_frame"])
 filter_start_date = datetime(2017, 1, 1)
@@ -74,7 +74,7 @@ def process(sessionId):
     data = None
     while True:
         promptFile = prompt_file()
-        fileResult = yield render_donation_page(promptFile, 33)
+        fileResult = yield render_donation_page(promptFile)
         if fileResult.__type__ == "PayloadString":
             meta_data.append(("debug", f"extracting file"))
             extractionResult = extract_data_from_zip(fileResult.value)
@@ -82,7 +82,7 @@ def process(sessionId):
                 meta_data.append(
                     ("debug", f"prompt confirmation to retry file selection")
                 )
-                retry_result = yield render_donation_page(retry_confirmation(), 33)
+                retry_result = yield render_donation_page(retry_confirmation())
                 if retry_result.__type__ == "PayloadTrue":
                     meta_data.append(("debug", f"skip due to invalid file"))
                     continue
@@ -90,13 +90,11 @@ def process(sessionId):
                     meta_data.append(("debug", f"retry prompt file"))
                     break
             if extractionResult == "no-data":
-                retry_result = yield render_donation_page(
-                    retry_no_data_confirmation(), 33
-                )
+                retry_result = yield render_donation_page(retry_no_data_confirmation())
                 if retry_result.__type__ == "PayloadTrue":
                     continue
-                else:
-                    break
+                data = ("aborted", fileResult.value)
+                break
             else:
                 meta_data.append(
                     ("debug", f"extraction successful, go to consent form")
@@ -107,14 +105,19 @@ def process(sessionId):
             meta_data.append(("debug", f"skip to next step"))
             break
 
-    # STEP 2: ask for consent
-    if data is not None:
-        meta_data.append(("debug", f"prompt consent"))
+    if isinstance(data, list):
         prompt = prompt_consent(data, meta_data)
-        consent_result = yield render_donation_page(prompt, 67)
-        if consent_result.__type__ == "PayloadJSON":
-            meta_data.append(("debug", f"donate consent data"))
-            yield donate(f"{sessionId}", consent_result.value)
+    else:
+        prompt = prompt_report_consent(os.path.basename(data[1]), meta_data)
+
+    meta_data.append(("debug", f"prompt consent"))
+    consent_result = yield render_donation_page(prompt)
+    if consent_result.__type__ == "PayloadJSON":
+        meta_data.append(("debug", f"donate consent data"))
+        yield donate(f"{sessionId}", consent_result.value)
+    if consent_result.__type__ == "PayloadFalse":
+        value = '{"status" : "donation declined"}'
+        yield donate(f"{sessionId}", value)
 
 
 def render_end_page():
@@ -122,13 +125,12 @@ def render_end_page():
     return CommandUIRender(page)
 
 
-def render_donation_page(body, progress):
+def render_donation_page(body):
     header = props.PropsUIHeader(
         props.Translatable({"en": "Samsung health", "nl": "Samsung health"})
     )
 
-    footer = props.PropsUIFooter(progress)
-    page = props.PropsUIPageDonation("sumsung-health", header, body, footer)
+    page = props.PropsUIPageDonation("sumsung-health", header, body)
     return CommandUIRender(page)
 
 
@@ -179,6 +181,40 @@ def prompt_consent(tables, meta_data):
         "log_messages", log_title, meta_frame
     )
     return props.PropsUIPromptConsentForm(tables, [meta_table])
+
+
+def prompt_report_consent(filename, meta_data):
+    log_title = props.Translatable({"en": "Log messages", "nl": "Log berichten"})
+
+    tables = [
+        props.PropsUIPromptConsentFormTable(
+            "filename",
+            props.Translatable({"nl": "Bestandsnaam", "en": "Filename"}),
+            pd.DataFrame({"Bestandsnaam": [filename]}),
+        )
+    ]
+
+    meta_frame = pd.DataFrame(meta_data, columns=["type", "message"])
+    meta_table = props.PropsUIPromptConsentFormTable(
+        "log_messages", log_title, meta_frame
+    )
+    return props.PropsUIPromptConsentForm(
+        tables,
+        [meta_table],
+        description=props.Translatable(
+            {
+                "nl": "Helaas konden we geen gegevens uit uw gegevenspakket halen. Wilt u de onderzoekers van het LISS panel hiervan op de hoogte stellen?",
+                "en": "Unfortunately we could not extract any data from your package. Would you like to report this to the researchers of the LISS panel?",
+            }
+        ),
+        donate_question=props.Translatable(
+            {
+                "en": "Do you want to report the above data?",
+                "nl": "Wilt u de bovenstaande gegevens rapporteren?",
+            }
+        ),
+        donate_button=props.Translatable({"nl": "Ja, rapporteer", "en": "Yes, report"}),
+    )
 
 
 def filter_files(file_list):
