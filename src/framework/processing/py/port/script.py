@@ -149,8 +149,8 @@ def retry_confirmation():
 def retry_no_data_confirmation():
     text = props.Translatable(
         {
-            "en": f"There does not seem to be any information in your file that can be used for the research. Continue, if you are sure that you selected the right file. Try again to select a different file.",
-            "nl": f"Helaas, er lijkt geen informatie in uw bestand te zitten dat gebruikt kan worden voor het onderzoek. Weet u zeker dat u het juiste bestand heeft gekozen? Ga dan verder. Probeer opnieuw als u een ander bestand wilt kiezen.",
+            "en": f"There does not seem to be any information in your file. That can happen. You will still be able to receive your reward. Click 'Continue' and proceed. If you have selected the wrong file by accident, then click 'Try again'.",
+            "nl": f"Er lijkt geen informatie in uw pakketje te zitten. Dat kan gebeuren. Met een leeg pakketje komt u nog steeds in aanmerking voor de vergoeding. Druk op 'Verder' om door te gaan. Als u per ongeluk het verkeerde bestand hebt gekozen, druk dan op 'Probeer opnieuw'.",
         }
     )
     ok = props.Translatable({"en": "Try again", "nl": "Probeer opnieuw"})
@@ -161,8 +161,8 @@ def retry_no_data_confirmation():
 def prompt_file():
     description = props.Translatable(
         {
-            "en": f"Click 'Choose file' to choose the file that you received from Samsung. If you click 'Continue', the data that is required for research is extracted from your file.",
-            "nl": f"Klik op ‘Kies bestand’ om het bestand dat u ontvangen hebt van Samsung te kiezen. Als u op 'Verder' klikt worden de gegevens die nodig zijn voor het onderzoek uit uw bestand gehaald.",
+            "en": f"Click 'Choose file' to choose the file that you received from Samsung. If you click 'Continue', the data that is required for research is extracted from your file. This may take some time. Thank you for your patience.",
+            "nl": f"Klik op ‘Kies bestand’ om het bestand dat u ontvangen hebt van Samsung te kiezen. Als u op 'Verder' klikt worden de gegevens die nodig zijn voor het onderzoek uit uw bestand gehaald. Dit kan soms even duren. Een moment geduld a.u.b.",
         }
     )
 
@@ -203,17 +203,17 @@ def prompt_report_consent(filename, meta_data):
         [meta_table],
         description=props.Translatable(
             {
-                "nl": "Helaas konden we geen gegevens uit uw gegevenspakket halen. Wilt u de onderzoekers van het LISS panel hiervan op de hoogte stellen?",
-                "en": "Unfortunately we could not extract any data from your package. Would you like to report this to the researchers of the LISS panel?",
+                "nl": "Hieronder ziet u de bestandsnaam van het gekozen bestand. U kunt deze doneren, zodat de onderzoekers kunnen zien of u een leeg pakketje hebt of dat er iets mis is gegaan.",
+                "en": "Below you can view the name of the chosen file. You can donate this file name, so that the researchers can view whether you had an empty package or something went wrong.",
             }
         ),
         donate_question=props.Translatable(
             {
-                "en": "Do you want to report the above data?",
-                "nl": "Wilt u de bovenstaande gegevens rapporteren?",
+                "en": "Do you want to donate the above file name?",
+                "nl": "Wilt u de bovenstaande bestandsnaam doneren?",
             }
         ),
-        donate_button=props.Translatable({"nl": "Ja, rapporteer", "en": "Yes, report"}),
+        donate_button=props.Translatable({"nl": "Ja, doneer", "en": "Yes, donate"}),
     )
 
 
